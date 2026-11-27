@@ -4,7 +4,7 @@
 
 Storytiva is an early-stage project for authors who want one dependable place to capture ideas, organize a manuscript gradually, return to their last writing session, and export their work. The product is designed for a bilingual Spanish-English market.
 
-> **Project status:** Initial web application scaffold. The core writing workflow is still under development.
+> **Project status:** Core writing loop in progress: email sign-in, book creation, chapter editor, cloud autosave, local draft recovery, and last-position persistence.
 
 ## Product direction
 
@@ -18,11 +18,9 @@ The MVP focuses on the everyday work around a manuscript:
 - Keep named versions and restore an earlier version safely.
 - Export the manuscript and notes to DOCX and Markdown.
 
-The MVP is intended to make starting, pausing, and resuming a writing session easier. AI assistance is optional and should present suggestions separately so the author remains in control of the manuscript.
+AI assistance is optional and should present suggestions separately so the author remains in control of the manuscript.
 
 ## Roadmap
-
-These capabilities are planned in stages and are not part of the initial MVP:
 
 | Capability | Planned priority | Direction |
 | --- | --- | --- |
@@ -35,6 +33,27 @@ These capabilities are planned in stages and are not part of the initial MVP:
 
 Roadmap inclusion is not a promise of immediate availability or guaranteed market, sales, or ranking data.
 
+## Local setup
+
+Requirements: Node.js 20.9 or newer and npm 10.9.2.
+
+1. Create a Supabase project.
+2. Copy `.env.example` to `.env.local` and set the project URL, publishable key, and site URL.
+3. Run `supabase/migrations/202611270001_initial_books.sql` in the Supabase SQL Editor.
+4. In Supabase Authentication URL Configuration, add `http://localhost:3000/auth/callback` to the allowed redirect URLs. Set the production callback URL after deployment.
+5. Install and start the app:
+
+```bash
+npm ci
+npm run dev
+```
+
+Open `http://localhost:3000`. Sign in with a magic link, create a book, and start writing. Supabase Auth email delivery limits may apply until custom SMTP is configured.
+
+## Security and data
+
+The Supabase migration enables row-level security and scopes book records, chapters, positions, and versions to their owner. The Supabase service-role key is not used by the application. Local unsaved drafts are held in this browser's IndexedDB; clearing browser data removes those local copies. Cloud versions are created when recovering a draft after a revision conflict.
+
 ## Product principles
 
 - **The author owns the work.** Generated text is a proposal; it never replaces accepted writing without explicit approval.
@@ -43,30 +62,6 @@ Roadmap inclusion is not a promise of immediate availability or guaranteed marke
 - **The manuscript is critical data.** Saving, recovery, versions, and export are core product concerns.
 - **AI stays optional and understandable.** Context, estimated cost, and controls should be visible before a generation task.
 
-## Language
-
-The product is intended for Spanish- and English-speaking authors. The repository currently uses English for technical documentation; product interface language support will be defined during MVP design.
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the initial contribution guidelines.
-
-## Development setup
-
-Requirements: Node.js 20.9 or newer and npm 10.9.2.
-
-```bash
-npm ci
-npm run dev
-```
-
-The app will be available at `http://localhost:3000`. Supabase environment variables will be added when authentication and cloud persistence are wired into the first writing flow.
-
 ## License
 
 Storytiva is intended to be open source under the MIT License. See [LICENSE](LICENSE).
-
-## Product specification
-
-The current product requirements document is maintained separately from this repository. This README summarizes its MVP direction and roadmap; update it when product decisions change.
-
