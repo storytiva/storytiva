@@ -1,87 +1,53 @@
-:root {
-  color-scheme: light;
-  --ink: #20223a;
-  --muted: #62657e;
-  --paper: #f8f7f3;
-  --card: #ffffff;
-  --accent: #5c527c;
-  --line: #e7e4ec;
-}
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Libre+Baskerville:wght@400;700&display=swap");
 
-* { box-sizing: border-box; }
-
-html, body { min-height: 100%; margin: 0; }
-
-body {
-  background: var(--paper);
-  color: var(--ink);
-  font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
-}
-
-.page-shell {
-  display: grid;
-  min-height: 100vh;
-  padding: 24px;
-  place-items: center;
-}
-
-.welcome-card {
-  width: min(100%, 760px);
-  padding: clamp(32px, 8vw, 80px);
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  background: var(--card);
-  box-shadow: 0 24px 80px rgb(32 34 58 / 7%);
-}
-
-.wordmark {
-  margin: 0 0 56px;
-  color: var(--accent);
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  font-size: 1.05rem;
-  font-weight: 750;
-  letter-spacing: 0.02em;
-}
-
-.eyebrow {
-  margin: 0 0 18px;
-  color: var(--muted);
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  font-size: 0.82rem;
-  letter-spacing: 0.04em;
-}
-
-h1 {
-  max-width: 14ch;
-  margin: 0;
-  font-size: clamp(2.6rem, 7vw, 4.8rem);
-  font-weight: 500;
-  letter-spacing: -0.045em;
-  line-height: 1.04;
-}
-
-.intro {
-  max-width: 54ch;
-  margin: 24px 0 0;
-  color: var(--muted);
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  font-size: 1.05rem;
-  line-height: 1.7;
-}
-
-.status {
-  margin-top: 48px;
-  padding-top: 20px;
-  border-top: 1px solid var(--line);
-  color: var(--accent);
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  font-size: 0.9rem;
-}
-
-.status span { display: block; margin-top: 6px; color: var(--muted); }
-
-@media (max-width: 520px) {
-  .page-shell { padding: 12px; }
-  .welcome-card { border-radius: 16px; }
-}
-
+:root { color-scheme: light; --ink:#20223a; --muted:#62657e; --paper:#f8f7f3; --card:#fff; --accent:#5c527c; --line:#e7e4ec; --gold:#d8a94b; }
+* { box-sizing:border-box; }
+html,body { min-height:100%; margin:0; }
+body { background:var(--paper); color:var(--ink); font-family:"DM Sans",system-ui,sans-serif; }
+a { color:inherit; text-decoration:none; }
+button,input,select { font:inherit; }
+button { cursor:pointer; }
+.page-shell { display:grid; min-height:100vh; padding:24px; place-items:center; }
+.welcome-card { width:min(100%,760px); padding:clamp(32px,8vw,80px); border:1px solid var(--line); border-radius:24px; background:var(--card); box-shadow:0 24px 80px rgb(32 34 58 / 7%); }
+.wordmark { margin:0; color:var(--accent); font-size:1.05rem; font-weight:750; letter-spacing:.02em; }
+.eyebrow { margin:0 0 14px; color:var(--muted); font-size:.82rem; letter-spacing:.04em; }
+h1 { max-width:18ch; margin:0; font-family:"Libre Baskerville",Georgia,serif; font-size:clamp(2.2rem,6vw,3.8rem); font-weight:400; letter-spacing:-.045em; line-height:1.12; }
+.intro { max-width:54ch; margin:24px 0 0; color:var(--muted); font-size:1.02rem; line-height:1.7; }
+.workspace-shell { min-height:100vh; }
+.topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px clamp(18px,5vw,72px); border-bottom:1px solid var(--line); background:#ffffffd9; }
+.topbar form { margin:0; }
+.breadcrumb { color:var(--muted); }
+.content-column { width:min(100% - 40px,900px); margin:64px auto; }
+.content-column h1 { margin-bottom:36px; }
+.create-form { padding:24px; border:1px solid var(--line); border-radius:16px; background:var(--card); }
+.create-form label,.stack-form label { display:block; margin-bottom:10px; font-weight:600; }
+.form-row { display:flex; gap:10px; }
+input,select { min-width:0; padding:12px 14px; border:1px solid var(--line); border-radius:9px; background:#fff; color:var(--ink); }
+.form-row input { flex:1; }
+button { padding:12px 16px; border:0; border-radius:9px; background:var(--accent); color:#fff; font-weight:600; }
+button:hover { filter:brightness(1.08); }
+.secondary-button { border:1px solid var(--line); background:#fff; color:var(--ink); }
+.book-list { display:grid; gap:12px; margin-top:24px; }
+.book-card { display:flex; flex-direction:column; gap:8px; padding:20px 22px; border:1px solid var(--line); border-radius:13px; background:var(--card); }
+.book-card:hover { border-color:var(--gold); }
+.book-card span,.empty-state { color:var(--muted); font-size:.9rem; }
+.auth-card { max-width:560px; }
+.auth-card .wordmark { display:inline-block; margin-bottom:42px; }
+.auth-card h1 { font-size:clamp(2.2rem,6vw,3.5rem); }
+.stack-form { display:grid; gap:10px; margin-top:30px; }
+.stack-form button { margin-top:8px; }
+.notice { padding:12px; border-radius:8px; background:#f1eef7; color:var(--accent); }
+.notice.error { background:#fff0ed; color:#a13c2d; }
+.editor-layout { width:min(100% - 36px,960px); margin:38px auto 80px; }
+.editor-heading { display:flex; justify-content:space-between; align-items:end; gap:20px; }
+.editor-heading h1 { font-size:clamp(1.8rem,5vw,2.7rem); }
+.save-status { padding-bottom:8px; color:var(--muted); font-size:.88rem; }
+.editor-toolbar { display:flex; gap:9px; margin:28px 0 12px; color:var(--muted); font-size:.82rem; }
+.editor-paper { min-height:65vh; padding:clamp(28px,7vw,76px); border:1px solid var(--line); border-radius:14px; background:var(--card); box-shadow:0 10px 40px rgb(32 34 58 / 4%); }
+.manuscript-editor { min-height:50vh; outline:none; font-family:"Libre Baskerville",Georgia,serif; font-size:1.08rem; line-height:1.9; }
+.manuscript-editor p { margin:0 0 1.1em; }
+.manuscript-editor h2,.manuscript-editor h3 { margin:1.5em 0 .6em; font-family:"DM Sans",sans-serif; }
+.conflict-panel { margin-top:22px; padding:18px; border:1px solid #ead9a7; border-radius:12px; background:#fffaf0; }
+.conflict-panel p { color:var(--muted); line-height:1.55; }
+.button-row { display:flex; flex-wrap:wrap; gap:8px; }
+@media(max-width:620px) { .form-row,.editor-heading { align-items:stretch; flex-direction:column; } .topbar { padding:16px; } .content-column { margin:40px auto; } .editor-paper { padding:24px; } }
