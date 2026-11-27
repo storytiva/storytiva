@@ -9,6 +9,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   let body: { nodeId?: string; cursorPosition?: number };
   try { body = await request.json(); } catch { return NextResponse.json({ error: "invalid_json" }, { status: 400 }); }
   if (typeof body.nodeId !== "string" || !Number.isInteger(body.cursorPosition) || (body.cursorPosition ?? -1) < 0) return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
+  const { data: node } = await supabase.from("book_nodes").select("id").eq("id", body.nodeId).eq("book_id", bookId).maybeSingle();
+  if (!node) return NextResponse.json({ error: "not_found" }, { status: 404 });
   const { error } = await supabase.from("book_positions").upsert({ book_id: bookId, owner_id: user.id, node_id: body.nodeId, cursor_position: body.cursorPosition, updated_at: new Date().toISOString() });
   if (error) return NextResponse.json({ error: "save_failed" }, { status: 400 });
   return NextResponse.json({ ok: true });
