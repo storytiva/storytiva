@@ -39,7 +39,7 @@ Requirements: Node.js 20.9 or newer and npm 10.9.2.
 
 1. Create a Supabase project.
 2. Copy `.env.example` to `.env.local` and set the project URL, publishable key, and site URL.
-3. Run `supabase/migrations/202611270001_initial_books.sql` in the Supabase SQL Editor.
+3. Run `supabase/migrations/202611260001_initial_books.sql` in the Supabase SQL Editor.
 4. In Supabase Authentication URL Configuration, add `http://localhost:3000/auth/callback` to the allowed redirect URLs. Set the production callback URL after deployment.
 5. Install and start the app:
 
