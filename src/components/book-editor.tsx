@@ -33,12 +33,12 @@ export function BookEditor({ bookId, bookTitle, node, initialCursor }: Props) {
     },
   });
 
-  const save = useCallback(async (content: Record<string, unknown>, recover = false) => {
+  const save = useCallback(async (content: Record<string, unknown>, recover = false): Promise<boolean> => {
     setStatus("Guardando…");
     try {
       const response = await fetch(`/api/nodes/${node.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content, expectedRevision: savedRevision.current, recover }) });
-      if (response.status === 409) { setConflict(content); setStatus("Hay otra versión guardada"); return; }
-      if (!response.ok) { setStatus("No se pudo guardar. El borrador sigue en este dispositivo."); return; }
+      if (response.status === 409) { setConflict(content); setStatus("Hay otra versión guardada"); return false; }
+      if (!response.ok) { setStatus("No se pudo guardar. El borrador sigue en este dispositivo."); return false; }
       const result = await response.json() as { revision: number };
       savedRevision.current = result.revision;
       setRevision(result.revision);
@@ -46,7 +46,8 @@ export function BookEditor({ bookId, bookTitle, node, initialCursor }: Props) {
       setRecoveryReady(false);
       setConflict(null);
       await removeDraft(node.id);
-    } catch { setStatus("Sin conexión. El borrador sigue en este dispositivo."); }
+      return true;
+    } catch { setStatus("Sin conexión. El borrador sigue en este dispositivo."); return false; }
   }, [node.id]);
 
   useEffect(() => {
@@ -62,9 +63,7 @@ export function BookEditor({ bookId, bookTitle, node, initialCursor }: Props) {
   }, [node.id]);
 
   const recover = async () => {
-    if (!conflict) return;
-    await save(conflict, true);
-    if (!conflict) window.location.reload();
+    if (conflict && await save(conflict, true)) window.location.reload();
   };
   const copyDraft = async () => {
     if (!conflict) return;
