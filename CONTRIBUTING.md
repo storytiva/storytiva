@@ -22,4 +22,12 @@ Never commit manuscripts, private author material, credentials, API keys, or oth
 
 ## Development workflow
 
-The implementation stack and automated checks have not yet been selected. Project-specific setup and verification instructions will be added when the MVP implementation is defined.
+The app uses Next.js, TypeScript, and npm. Use Node.js 20.9 or newer.
+
+```bash
+npm ci
+npm run dev
+```
+
+Before opening a pull request, run `npm run lint`, `npm run typecheck`, and `npm run build`. Automated application tests have not been configured yet.
+

@@ -2,9 +2,9 @@
 
 **An open-source workspace that helps authors spend less effort managing a book and more time writing it.**
 
-Storytiva is an early-stage project for authors who want one dependable place to capture ideas, organize a manuscript gradually, return to their last writing session, and export their work. The product is designed for a bilingual Spanish–English market.
+Storytiva is an early-stage project for authors who want one dependable place to capture ideas, organize a manuscript gradually, return to their last writing session, and export their work. The product is designed for a bilingual Spanish-English market.
 
-> **Project status:** Repository bootstrap. The product scope is documented; implementation technology and MVP code have not been selected yet.
+> **Project status:** Initial web application scaffold. The core writing workflow is still under development.
 
 ## Product direction
 
@@ -49,7 +49,18 @@ The product is intended for Spanish- and English-speaking authors. The repositor
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the initial contribution guidelines. The implementation stack and detailed development workflow will be documented once selected.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the initial contribution guidelines.
+
+## Development setup
+
+Requirements: Node.js 20.9 or newer and npm 10.9.2.
+
+```bash
+npm ci
+npm run dev
+```
+
+The app will be available at `http://localhost:3000`. Supabase environment variables will be added when authentication and cloud persistence are wired into the first writing flow.
 
 ## License
 
@@ -58,3 +69,4 @@ Storytiva is intended to be open source under the MIT License. See [LICENSE](LIC
 ## Product specification
 
 The current product requirements document is maintained separately from this repository. This README summarizes its MVP direction and roadmap; update it when product decisions change.
+
