@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BookEditor } from "@/components/book-editor";
-import { signOut } from "@/app/logout/actions";
+import { signOut } from "../../logout/actions";
 
 export default async function BookPage({ params }: { params: Promise<{ bookId: string }> }) {
   const { bookId } = await params;
