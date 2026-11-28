@@ -124,3 +124,32 @@ button:hover { filter:brightness(1.08); }
   .idea-actions { justify-content:stretch; }
   .idea-actions button { flex:1; }
 }
+
+.book-workspace { display:grid; grid-template-columns:minmax(210px,250px) minmax(0,960px); align-items:start; gap:clamp(18px,3vw,34px); width:min(100% - 36px,1280px); margin:0 auto; }
+.book-workspace .editor-layout { width:100%; max-width:none; min-width:0; margin:38px 0 80px; }
+.chapter-sidebar { position:sticky; top:16px; min-width:0; margin-top:38px; padding:18px; border:1px solid var(--line); border-radius:13px; background:#fff; }
+.chapter-sidebar > header { margin-bottom:16px; }
+.chapter-sidebar > header .eyebrow { margin-bottom:6px; }
+.chapter-sidebar h2 { margin:0; font-family:"Libre Baskerville",Georgia,serif; font-size:1.3rem; font-weight:400; }
+.chapter-create-form { display:grid; gap:8px; padding-bottom:16px; border-bottom:1px solid var(--line); }
+.chapter-create-form label { font-size:.82rem; font-weight:600; }
+.chapter-create-form input { width:100%; padding:9px 10px; font-size:.86rem; }
+.chapter-create-form button { padding:9px 10px; font-size:.84rem; }
+.chapter-create-form button:disabled { cursor:not-allowed; opacity:.55; }
+.chapter-list { display:flex; flex-direction:column; gap:6px; margin:14px 0 0; padding:0; list-style:none; }
+.chapter-entry { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:4px; padding:4px; border-radius:8px; }
+.chapter-entry.active { background:#f3f0f8; }
+.chapter-open { overflow:hidden; padding:8px 6px; background:transparent; color:var(--ink); text-align:left; text-overflow:ellipsis; white-space:nowrap; font-size:.86rem; font-weight:500; }
+.chapter-entry.active .chapter-open { color:var(--accent); font-weight:700; }
+.chapter-controls { display:flex; gap:2px; }
+.chapter-controls button { width:26px; height:28px; padding:0; border:1px solid transparent; background:transparent; color:var(--muted); font-size:.85rem; }
+.chapter-controls button:hover:not(:disabled) { border-color:var(--line); background:#fff; }
+.chapter-controls button:disabled { cursor:not-allowed; opacity:.3; }
+.chapter-error { color:#a13c2d; font-size:.8rem; line-height:1.4; }
+.chapter-empty { padding:14px; color:var(--muted); line-height:1.6; }
+@media(max-width:900px) {
+  .book-workspace { grid-template-columns:1fr; gap:0; width:min(100% - 24px,960px); }
+  .chapter-sidebar { position:static; margin-top:18px; }
+  .book-workspace .editor-layout { margin-top:24px; }
+  .chapter-list { max-height:240px; overflow:auto; }
+}
