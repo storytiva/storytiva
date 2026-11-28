@@ -48,11 +48,11 @@ npm ci
 npm run dev
 ```
 
-Open `http://localhost:3000`. Sign in with a magic link, create a book, and start writing. Supabase Auth email delivery limits may apply until custom SMTP is configured.
+Open `http://localhost:3000`. Sign in with a magic link, create a book, start writing, and capture unsorted ideas from the editor. Supabase Auth email delivery limits may apply until custom SMTP is configured.
 
 ## Security and data
 
-The Supabase migration enables row-level security and scopes book records, chapters, positions, and versions to their owner. The Supabase service-role key is not used by the application. Local unsaved drafts are held in this browser's IndexedDB; clearing browser data removes those local copies. Automatic checkpoints are created at most once every fifteen minutes per chapter, named milestones can be created from the editor, and restoring a version first saves the current text as a recovery point.
+The Supabase migration enables row-level security and scopes book records, chapters, ideas, positions, and versions to their owner. The Supabase service-role key is not used by the application. Local unsaved drafts are held in this browser's IndexedDB; clearing browser data removes those local copies. Automatic checkpoints are created at most once every fifteen minutes per chapter, named milestones can be created from the editor, and restoring a version first saves the current text as a recovery point.
 
 ## Product principles
 
