@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createBook } from "./actions";
 import { createClient } from "@/lib/supabase/server";
-import { signOut } from "@/app/logout/actions";
+import { signOut } from "../logout/actions";
 
 export default async function BooksPage() {
   const supabase = await createClient();
