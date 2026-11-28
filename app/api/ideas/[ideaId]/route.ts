@@ -17,9 +17,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const { data, error } = await supabase.from("book_ideas")
     .update({ status: body.status, updated_at: new Date().toISOString() })
     .eq("id", ideaId)
-    .select("id,status")
+    .select("id,status,book_id")
     .maybeSingle();
   if (error) return NextResponse.json({ error: "update_failed" }, { status: 400 });
   if (!data) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  await supabase.from("books").update({ updated_at: new Date().toISOString() }).eq("id", data.book_id);
   return NextResponse.json({ idea: data });
 }
