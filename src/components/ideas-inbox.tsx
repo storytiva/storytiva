@@ -69,10 +69,10 @@ export function IdeasInbox({ bookId, onClose, onInsertIdea }: { bookId: string; 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "archived" }),
       });
+      await loadIdeas();
       if (!response.ok) {
         setError("La idea quedó insertada en el capítulo, pero no se pudo archivar. Puedes archivarla manualmente.");
       }
-      await loadIdeas();
     } catch {
       setError("No se pudo guardar la idea en el capítulo. Sigue disponible en la bandeja.");
     } finally {
