@@ -40,7 +40,7 @@ begin
   order by v.created_at desc
   limit 1;
 
-  if last_snapshot_at is null or last_snapshot_at <= now() - interval '5 minutes' then
+  if last_snapshot_at is null or last_snapshot_at <= now() - interval '15 minutes' then
     insert into public.book_versions(book_id, node_id, created_by, revision, title, content, source)
     values (parent_book, target_node_id, auth.uid(), current_revision, current_title, current_content, 'autosave');
     did_snapshot := true;
