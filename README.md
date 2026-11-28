@@ -52,7 +52,7 @@ Open `http://localhost:3000`. Sign in with a magic link, create a book, and star
 
 ## Security and data
 
-The Supabase migration enables row-level security and scopes book records, chapters, positions, and versions to their owner. The Supabase service-role key is not used by the application. Local unsaved drafts are held in this browser's IndexedDB; clearing browser data removes those local copies. Automatic checkpoints are created at most once every five minutes per chapter, named milestones can be created from the editor, and restoring a version first saves the current text as a recovery point.
+The Supabase migration enables row-level security and scopes book records, chapters, positions, and versions to their owner. The Supabase service-role key is not used by the application. Local unsaved drafts are held in this browser's IndexedDB; clearing browser data removes those local copies. Automatic checkpoints are created at most once every fifteen minutes per chapter, named milestones can be created from the editor, and restoring a version first saves the current text as a recovery point.
 
 ## Product principles
 
