@@ -4,7 +4,7 @@
 
 Storytiva is an early-stage project for authors who want one dependable place to capture ideas, organize a manuscript gradually, return to their last writing session, and export their work. The product is designed for a bilingual Spanish-English market.
 
-> **Project status:** Core writing loop in progress: email sign-in, book creation, chapter editor, cloud autosave, local draft recovery, and last-position persistence.
+> **Project status:** Core writing loop in progress: email sign-in, book creation, chapter editor, cloud autosave, local draft recovery, last-position persistence, version history, a quick-capture idea inbox, and inserting ideas into the open chapter.
 
 ## Product direction
 
@@ -48,11 +48,11 @@ npm ci
 npm run dev
 ```
 
-Open `http://localhost:3000`. Sign in with a magic link, create a book, and start writing. Supabase Auth email delivery limits may apply until custom SMTP is configured.
+Open `http://localhost:3000`. Sign in with a magic link, create a book, start writing, capture unsorted ideas from the editor, and insert them into the open chapter when ready. Supabase Auth email delivery limits may apply until custom SMTP is configured.
 
 ## Security and data
 
-The Supabase migration enables row-level security and scopes book records, chapters, positions, and versions to their owner. The Supabase service-role key is not used by the application. Local unsaved drafts are held in this browser's IndexedDB; clearing browser data removes those local copies. Automatic checkpoints are created at most once every fifteen minutes per chapter, named milestones can be created from the editor, and restoring a version first saves the current text as a recovery point.
+The Supabase migration enables row-level security and scopes book records, chapters, ideas, positions, and versions to their owner. The Supabase service-role key is not used by the application. Local unsaved drafts are held in this browser's IndexedDB; clearing browser data removes those local copies. Automatic checkpoints are created at most once every fifteen minutes per chapter, named milestones can be created from the editor, and restoring a version first saves the current text as a recovery point.
 
 ## Product principles
 
