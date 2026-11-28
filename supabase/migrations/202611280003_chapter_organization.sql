@@ -34,6 +34,15 @@ create policy "Owners manage chapter positions" on public.book_node_positions fo
     )
   );
 
+insert into public.book_node_positions(node_id, book_id, owner_id, cursor_position, updated_at)
+select p.node_id, p.book_id, p.owner_id, p.cursor_position, p.updated_at
+from public.book_positions p
+join public.book_nodes n on n.id = p.node_id and n.book_id = p.book_id
+where p.node_id is not null and n.kind = 'chapter'
+on conflict (node_id) do update
+  set cursor_position = excluded.cursor_position,
+      updated_at = excluded.updated_at;
+
 grant select, insert, update, delete on public.book_node_positions to authenticated;
 
 create or replace function public.create_book_chapter(
