@@ -19,7 +19,7 @@ create policy "Owners manage chapter positions" on public.book_node_positions fo
     )
     and exists (
       select 1 from public.book_nodes n
-      where n.id = node_id and n.book_id = book_id
+      where n.id = public.book_node_positions.node_id and n.book_id = public.book_node_positions.book_id
     )
   )
   with check (
