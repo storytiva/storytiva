@@ -1,16 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { readDraft, removeDraft, writeDraft } from "@/lib/draft-cache";
 import { VersionHistory } from "@/components/version-history";
 import { IdeasInbox } from "@/components/ideas-inbox";
+import { ChapterNavigator, type ChapterItem } from "@/components/chapter-navigator";
 
 type NodeData = { id: string; title: string; content: Record<string, unknown>; revision: number };
-type Props = { bookId: string; bookTitle: string; node: NodeData; initialCursor: number };
+type Props = { bookId: string; bookTitle: string; language: string; node: NodeData; chapters: ChapterItem[]; chapterPositions: Record<string, number>; initialCursor: number };
 
-export function BookEditor({ bookId, bookTitle, node, initialCursor }: Props) {
+export function BookEditor({ bookId, bookTitle, language, node, chapters, chapterPositions, initialCursor }: Props) {
+  const router = useRouter();
   const [revision, setRevision] = useState(node.revision);
   const [status, setStatus] = useState("Guardado");
   const [conflict, setConflict] = useState<Record<string, unknown> | null>(null);
@@ -19,6 +22,7 @@ export function BookEditor({ bookId, bookTitle, node, initialCursor }: Props) {
   const [ideasOpen, setIdeasOpen] = useState(false);
   const savedRevision = useRef(node.revision);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const positionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const editor = useEditor({
     extensions: [StarterKit],
     content: node.content,
@@ -29,11 +33,15 @@ export function BookEditor({ bookId, bookTitle, node, initialCursor }: Props) {
       setStatus("Guardando…");
       void writeDraft({ nodeId: node.id, revision: savedRevision.current, content, updatedAt: Date.now() });
       if (saveTimer.current) clearTimeout(saveTimer.current);
-      saveTimer.current = setTimeout(() => { void save(content); }, 900);
+      saveTimer.current = setTimeout(() => { saveTimer.current = null; void save(content); }, 900);
     },
     onSelectionUpdate: ({ editor: current }) => {
       const pos = current.state.selection.from;
-      void fetch(`/api/books/${bookId}/position`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nodeId: node.id, cursorPosition: pos }) });
+      if (positionTimer.current) clearTimeout(positionTimer.current);
+      positionTimer.current = setTimeout(() => {
+        positionTimer.current = null;
+        void fetch(`/api/books/${bookId}/position`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nodeId: node.id, cursorPosition: pos }) });
+      }, 700);
     },
   });
 
@@ -63,8 +71,27 @@ export function BookEditor({ bookId, bookTitle, node, initialCursor }: Props) {
         setStatus("Hay un borrador local pendiente");
       }
     }).catch(() => undefined);
-    return () => { active = false; if (saveTimer.current) clearTimeout(saveTimer.current); };
+    return () => { active = false; if (saveTimer.current) clearTimeout(saveTimer.current); if (positionTimer.current) clearTimeout(positionTimer.current); };
   }, [node.id]);
+
+  const openChapter = async (chapterId: string) => {
+    if (chapterId === node.id || !editor) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = null;
+    if (!await save(editor.getJSON())) return;
+    if (positionTimer.current) clearTimeout(positionTimer.current);
+    const currentPosition = editor.state.selection.from;
+    const targetPosition = chapterPositions[chapterId] ?? 0;
+    try {
+      const saveCurrentPosition = await fetch(`/api/books/${bookId}/position`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nodeId: node.id, cursorPosition: currentPosition }) });
+      if (!saveCurrentPosition.ok) throw new Error("position");
+      const activateChapter = await fetch(`/api/books/${bookId}/position`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nodeId: chapterId, cursorPosition: targetPosition }) });
+      if (!activateChapter.ok) throw new Error("position");
+      router.push(`/books/${bookId}?node=${encodeURIComponent(chapterId)}`);
+    } catch {
+      setStatus("No se pudo guardar la posición del capítulo.");
+    }
+  };
 
   const recover = async () => {
     if (conflict && await save(conflict, true)) window.location.reload();
@@ -75,5 +102,5 @@ export function BookEditor({ bookId, bookTitle, node, initialCursor }: Props) {
     setStatus("Borrador copiado como JSON");
   };
 
-  return <section className="editor-layout"><div className="editor-heading"><div><p className="eyebrow">{bookTitle}</p><h1>{node.title}</h1></div><span className="save-status" role="status">{status}</span></div>{conflict && <aside className="conflict-panel"><strong>{recoveryReady ? "Se encontró un borrador en este dispositivo." : "Este capítulo cambió en otra sesión."}</strong><p>Puedes guardar el borrador como nueva revisión; la versión de la nube quedará registrada para recuperación.</p><div className="button-row"><button type="button" onClick={recover}>Recuperar mi borrador</button><button className="secondary-button" type="button" onClick={copyDraft}>Copiar borrador</button><button className="secondary-button" type="button" onClick={() => { setConflict(null); setRecoveryReady(false); setStatus("La versión de la nube se conserva"); }}>Usar versión guardada</button></div></aside>}<div className="editor-toolbar"><span>Revisión {revision}</span><span>·</span><span>El contenido se guarda automáticamente</span><button type="button" className="secondary-button ideas-button" onClick={() => setIdeasOpen(true)}>Ideas sueltas</button><button type="button" className="secondary-button history-button" onClick={() => setHistoryOpen(true)}>Historial</button></div><div className="editor-paper"><EditorContent editor={editor}/></div>{ideasOpen && <IdeasInbox bookId={bookId} onClose={() => setIdeasOpen(false)} onInsertIdea={async (body) => { if (!editor) return false; editor.chain().focus("end").insertContent({ type: "paragraph", content: [{ type: "text", text: body }] }).run(); if (saveTimer.current) clearTimeout(saveTimer.current); saveTimer.current = null; return save(editor.getJSON()); }}/>}{historyOpen && <VersionHistory nodeId={node.id} currentContent={editor?.getJSON() ?? node.content} beforeCheckpoint={async () => editor ? save(editor.getJSON()) : false} onClose={() => setHistoryOpen(false)} onRestored={() => window.location.reload()}/>}</section>;
+  return <div className="book-workspace"><ChapterNavigator bookId={bookId} language={language} chapters={chapters} activeChapterId={node.id} onOpenChapter={openChapter}/><section className="editor-layout"><div className="editor-heading"><div><p className="eyebrow">{bookTitle}</p><h1>{node.title}</h1></div><span className="save-status" role="status">{status}</span></div>{conflict && <aside className="conflict-panel"><strong>{recoveryReady ? "Se encontró un borrador en este dispositivo." : "Este capítulo cambió en otra sesión."}</strong><p>Puedes guardar el borrador como nueva revisión; la versión de la nube quedará registrada para recuperación.</p><div className="button-row"><button type="button" onClick={recover}>Recuperar mi borrador</button><button className="secondary-button" type="button" onClick={copyDraft}>Copiar borrador</button><button className="secondary-button" type="button" onClick={() => { setConflict(null); setRecoveryReady(false); setStatus("La versión de la nube se conserva"); }}>Usar versión guardada</button></div></aside>}<div className="editor-toolbar"><span>Revisión {revision}</span><span>·</span><span>El contenido se guarda automáticamente</span><button type="button" className="secondary-button ideas-button" onClick={() => setIdeasOpen(true)}>Ideas sueltas</button><button type="button" className="secondary-button history-button" onClick={() => setHistoryOpen(true)}>Historial</button></div><div className="editor-paper"><EditorContent editor={editor}/></div>{ideasOpen && <IdeasInbox bookId={bookId} onClose={() => setIdeasOpen(false)} onInsertIdea={async (body) => { if (!editor) return false; editor.chain().focus("end").insertContent({ type: "paragraph", content: [{ type: "text", text: body }] }).run(); if (saveTimer.current) clearTimeout(saveTimer.current); saveTimer.current = null; return save(editor.getJSON()); }}/>}{historyOpen && <VersionHistory nodeId={node.id} currentContent={editor?.getJSON() ?? node.content} beforeCheckpoint={async () => editor ? save(editor.getJSON()) : false} onClose={() => setHistoryOpen(false)} onRestored={() => window.location.reload()}/>}</section></div>;
 }
