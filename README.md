@@ -39,7 +39,7 @@ Requirements: Node.js 20.9 or newer and npm 10.9.2.
 
 1. Create a Supabase project.
 2. Copy `.env.example` to `.env.local` and set the project URL, publishable key, and site URL.
-3. Run `supabase/migrations/202611260001_initial_books.sql` in the Supabase SQL Editor.
+3. Run the SQL files in `supabase/migrations/` in filename order. If the initial book schema is already installed, run only the newer migration that has not been applied.
 4. In Supabase Authentication URL Configuration, add `http://localhost:3000/auth/callback` to the allowed redirect URLs. Set the production callback URL after deployment.
 5. Install and start the app:
 
@@ -52,7 +52,7 @@ Open `http://localhost:3000`. Sign in with a magic link, create a book, and star
 
 ## Security and data
 
-The Supabase migration enables row-level security and scopes book records, chapters, positions, and versions to their owner. The Supabase service-role key is not used by the application. Local unsaved drafts are held in this browser's IndexedDB; clearing browser data removes those local copies. Cloud versions are created when recovering a draft after a revision conflict.
+The Supabase migration enables row-level security and scopes book records, chapters, positions, and versions to their owner. The Supabase service-role key is not used by the application. Local unsaved drafts are held in this browser's IndexedDB; clearing browser data removes those local copies. Automatic checkpoints are created at most once every five minutes per chapter, named milestones can be created from the editor, and restoring a version first saves the current text as a recovery point.
 
 ## Product principles
 
