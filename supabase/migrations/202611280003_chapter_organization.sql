@@ -1,3 +1,41 @@
+create table public.book_node_positions (
+  node_id uuid primary key references public.book_nodes(id) on delete cascade,
+  book_id uuid not null references public.books(id) on delete cascade,
+  owner_id uuid not null references auth.users(id) on delete cascade,
+  cursor_position integer not null default 0 check (cursor_position >= 0),
+  updated_at timestamptz not null default now()
+);
+
+create index book_node_positions_book_idx on public.book_node_positions (book_id);
+
+alter table public.book_node_positions enable row level security;
+
+create policy "Owners manage chapter positions" on public.book_node_positions for all to authenticated
+  using (
+    owner_id = (select auth.uid())
+    and exists (
+      select 1 from public.books b
+      where b.id = book_id and b.owner_id = (select auth.uid())
+    )
+    and exists (
+      select 1 from public.book_nodes n
+      where n.id = node_id and n.book_id = book_id
+    )
+  )
+  with check (
+    owner_id = (select auth.uid())
+    and exists (
+      select 1 from public.books b
+      where b.id = book_id and b.owner_id = (select auth.uid())
+    )
+    and exists (
+      select 1 from public.book_nodes n
+      where n.id = node_id and n.book_id = book_id
+    )
+  );
+
+grant select, insert, update, delete on public.book_node_positions to authenticated;
+
 create or replace function public.create_book_chapter(
   target_book_id uuid,
   chapter_title text
@@ -29,7 +67,7 @@ begin
   values (target_book_id, 'chapter', safe_title, next_position)
   returning id into new_chapter_id;
 
-  insert into public.book_positions(book_id, owner_id, node_id, cursor_position, updated_at)
+  insert into public.book_node_positions(node_id, book_id, owner_id, cursor_position, updated_at)\n  values (new_chapter_id, target_book_id, auth.uid(), 0, now())\n  on conflict (node_id) do update set cursor_position = 0, updated_at = now();\n\n  insert into public.book_positions(book_id, owner_id, node_id, cursor_position, updated_at)
   values (target_book_id, auth.uid(), new_chapter_id, 0, now())
   on conflict (book_id) do update
     set owner_id = excluded.owner_id,
