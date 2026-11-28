@@ -22,6 +22,8 @@ export function BookEditor({ bookId, bookTitle, language, node, chapters, chapte
   const [ideasOpen, setIdeasOpen] = useState(false);
   const savedRevision = useRef(node.revision);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveInFlight = useRef<Promise<boolean> | null>(null);
+  const lastSavedContent = useRef(JSON.stringify(node.content));
   const positionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const editor = useEditor({
     extensions: [StarterKit],
@@ -46,20 +48,51 @@ export function BookEditor({ bookId, bookTitle, language, node, chapters, chapte
   });
 
   const save = useCallback(async (content: Record<string, unknown>, recover = false): Promise<boolean> => {
-    setStatus("Guardando…");
-    try {
-      const response = await fetch(`/api/nodes/${node.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content, expectedRevision: savedRevision.current, recover }) });
-      if (response.status === 409) { setConflict(content); setStatus("Hay otra versión guardada"); return false; }
-      if (!response.ok) { setStatus("No se pudo guardar. El borrador sigue en este dispositivo."); return false; }
-      const result = await response.json() as { revision: number };
-      savedRevision.current = result.revision;
-      setRevision(result.revision);
-      setStatus("Guardado");
-      setRecoveryReady(false);
-      setConflict(null);
-      await removeDraft(node.id);
-      return true;
-    } catch { setStatus("Sin conexión. El borrador sigue en este dispositivo."); return false; }
+    const serialized = JSON.stringify(content);
+    if (!recover && serialized === lastSavedContent.current) return true;
+
+    if (saveInFlight.current) {
+      const previousSucceeded = await saveInFlight.current;
+      if (!previousSucceeded) return false;
+      if (!recover && serialized === lastSavedContent.current) return true;
+    }
+
+    const operation = (async (): Promise<boolean> => {
+      setStatus("Guardando…");
+      try {
+        const response = await fetch(`/api/nodes/${node.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content, expectedRevision: savedRevision.current, recover }),
+        });
+        if (response.status === 409) {
+          setConflict(content);
+          setStatus("Hay otra versión guardada");
+          return false;
+        }
+        if (!response.ok) {
+          setStatus("No se pudo guardar. El borrador sigue en este dispositivo.");
+          return false;
+        }
+        const result = await response.json() as { revision: number };
+        savedRevision.current = result.revision;
+        lastSavedContent.current = serialized;
+        setRevision(result.revision);
+        setStatus("Guardado");
+        setRecoveryReady(false);
+        setConflict(null);
+        await removeDraft(node.id);
+        return true;
+      } catch {
+        setStatus("Sin conexión. El borrador sigue en este dispositivo.");
+        return false;
+      }
+    })();
+
+    saveInFlight.current = operation;
+    const succeeded = await operation;
+    if (saveInFlight.current === operation) saveInFlight.current = null;
+    return succeeded;
   }, [node.id]);
 
   useEffect(() => {
