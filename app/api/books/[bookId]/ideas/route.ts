@@ -33,5 +33,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     .select("id,body,status,created_at,updated_at")
     .single();
   if (error || !data) return NextResponse.json({ error: "save_failed" }, { status: 400 });
+  await supabase.from("books").update({ updated_at: new Date().toISOString() }).eq("id", bookId);
   return NextResponse.json({ idea: data }, { status: 201 });
 }
