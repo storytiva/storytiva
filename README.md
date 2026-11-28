@@ -4,7 +4,7 @@
 
 Storytiva is an early-stage project for authors who want one dependable place to capture ideas, organize a manuscript gradually, return to their last writing session, and export their work. The product is designed for a bilingual Spanish-English market.
 
-> **Project status:** Core writing loop in progress: email sign-in, book creation, chapter editor, cloud autosave, local draft recovery, last-position persistence, version history, and a quick-capture idea inbox.
+> **Project status:** Core writing loop in progress: email sign-in, book creation, chapter editor, cloud autosave, local draft recovery, last-position persistence, version history, a quick-capture idea inbox, and inserting ideas into the open chapter.
 
 ## Product direction
 
@@ -48,7 +48,7 @@ npm ci
 npm run dev
 ```
 
-Open `http://localhost:3000`. Sign in with a magic link, create a book, start writing, and capture unsorted ideas from the editor. Supabase Auth email delivery limits may apply until custom SMTP is configured.
+Open `http://localhost:3000`. Sign in with a magic link, create a book, start writing, capture unsorted ideas from the editor, and insert them into the open chapter when ready. Supabase Auth email delivery limits may apply until custom SMTP is configured.
 
 ## Security and data
 
