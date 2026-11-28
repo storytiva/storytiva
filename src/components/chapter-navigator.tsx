@@ -40,7 +40,6 @@ export function ChapterNavigator({
       const result = await response.json() as { id: string };
       setTitle("");
       await onOpenChapter(result.id);
-      router.refresh();
     } catch {
       setError("No se pudo crear el capítulo.");
     } finally {
