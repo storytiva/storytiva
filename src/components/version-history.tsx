@@ -15,9 +15,10 @@ function toPlainText(node: unknown): string {
   if (!node || typeof node !== "object") return "";
   const value = node as { text?: unknown; content?: unknown[]; type?: string };
   if (typeof value.text === "string") return value.text;
+  if (value.type === "hardBreak") return "\\n";
   if (!Array.isArray(value.content)) return "";
-  const separator = ["paragraph", "heading", "blockquote", "listItem"].includes(value.type ?? "") ? "\n" : "";
-  return value.content.map(toPlainText).join(separator);
+  const text = value.content.map(toPlainText).join("");
+  return ["paragraph", "heading", "blockquote", "listItem"].includes(value.type ?? "") ? text + "\\n" : text;
 }
 
 function versionName(version: Version) {
