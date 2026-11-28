@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 type Version = {
   id: string;
@@ -33,11 +33,13 @@ export function VersionHistory({
   currentContent,
   onClose,
   onRestored,
+  beforeCheckpoint,
 }: {
   nodeId: string;
   currentContent: Record<string, unknown>;
   onClose: () => void;
   onRestored: () => void;
+  beforeCheckpoint: () => Promise<boolean>;
 }) {
   const [versions, setVersions] = useState<Version[]>([]);
   const [selected, setSelected] = useState<VersionDetail | null>(null);
@@ -48,7 +50,7 @@ export function VersionHistory({
   const [restoring, setRestoring] = useState(false);
   const [error, setError] = useState("");
 
-  const loadVersions = async () => {
+  const loadVersions = useCallback(async () => {
     setLoadingList(true);
     const response = await fetch(`/api/nodes/${nodeId}/versions`);
     if (!response.ok) {
@@ -59,11 +61,11 @@ export function VersionHistory({
     const result = await response.json() as { versions: Version[] };
     setVersions(result.versions);
     setLoadingList(false);
-  };
+  }, [nodeId]);
 
   useEffect(() => {
     void loadVersions();
-  }, [nodeId]);
+  }, [loadVersions]);
 
   const selectVersion = async (version: Version) => {
     setLoadingDetail(true);
@@ -84,6 +86,8 @@ export function VersionHistory({
     if (!label.trim()) return;
     setSaving(true);
     setError("");
+    const saved = await beforeCheckpoint();
+    if (!saved) { setSaving(false); setError("No se pudo guardar el texto actual. El hito no se creó."); return; }
     const response = await fetch(`/api/nodes/${nodeId}/versions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
