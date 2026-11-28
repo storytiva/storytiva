@@ -67,7 +67,11 @@ begin
   values (target_book_id, 'chapter', safe_title, next_position)
   returning id into new_chapter_id;
 
-  insert into public.book_node_positions(node_id, book_id, owner_id, cursor_position, updated_at)\n  values (new_chapter_id, target_book_id, auth.uid(), 0, now())\n  on conflict (node_id) do update set cursor_position = 0, updated_at = now();\n\n  insert into public.book_positions(book_id, owner_id, node_id, cursor_position, updated_at)
+  insert into public.book_node_positions(node_id, book_id, owner_id, cursor_position, updated_at)
+  values (new_chapter_id, target_book_id, auth.uid(), 0, now())
+  on conflict (node_id) do update set cursor_position = 0, updated_at = now();
+
+  insert into public.book_positions(book_id, owner_id, node_id, cursor_position, updated_at)
   values (target_book_id, auth.uid(), new_chapter_id, 0, now())
   on conflict (book_id) do update
     set owner_id = excluded.owner_id,
