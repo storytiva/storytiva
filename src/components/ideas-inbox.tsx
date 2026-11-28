@@ -4,12 +4,13 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 type Idea = { id: string; body: string; status: "inbox" | "archived"; created_at: string };
 
-export function IdeasInbox({ bookId, onClose }: { bookId: string; onClose: () => void }) {
+export function IdeasInbox({ bookId, onClose, onInsertIdea }: { bookId: string; onClose: () => void; onInsertIdea: (body: string) => Promise<boolean> }) {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [activeTab, setActiveTab] = useState<"inbox" | "archived">("inbox");
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [insertingId, setInsertingId] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   const loadIdeas = useCallback(async () => {
@@ -57,6 +58,28 @@ export function IdeasInbox({ bookId, onClose }: { bookId: string; onClose: () =>
     }
   };
 
+  const insertIdea = async (idea: Idea) => {
+    setInsertingId(idea.id);
+    setError("");
+    try {
+      const inserted = await onInsertIdea(idea.body);
+      if (!inserted) throw new Error("insert");
+      const response = await fetch(`/api/ideas/${idea.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "archived" }),
+      });
+      if (!response.ok) {
+        setError("La idea quedó insertada en el capítulo, pero no se pudo archivar. Puedes archivarla manualmente.");
+      }
+      await loadIdeas();
+    } catch {
+      setError("No se pudo guardar la idea en el capítulo. Sigue disponible en la bandeja.");
+    } finally {
+      setInsertingId(null);
+    }
+  };
+
   const changeStatus = async (idea: Idea) => {
     const status = idea.status === "inbox" ? "archived" : "inbox";
     setError("");
@@ -94,7 +117,7 @@ export function IdeasInbox({ bookId, onClose }: { bookId: string; onClose: () =>
         {!loading && ideas.length === 0 && <p className="idea-empty">{activeTab === "inbox" ? "Aún no hay ideas. Puedes capturar una arriba sin organizarla." : "No hay ideas archivadas."}</p>}
         {!loading && ideas.map((idea) => <article className="idea-card" key={idea.id}>
           <p>{idea.body}</p>
-          <footer><time dateTime={idea.created_at}>{new Date(idea.created_at).toLocaleString()}</time><button type="button" className="secondary-button" onClick={() => void changeStatus(idea)}>{idea.status === "inbox" ? "Archivar" : "Devolver a bandeja"}</button></footer>
+          <footer><time dateTime={idea.created_at}>{new Date(idea.created_at).toLocaleString()}</time><div className="idea-actions">{idea.status === "inbox" && <button type="button" disabled={insertingId === idea.id} onClick={() => void insertIdea(idea)}>{insertingId === idea.id ? "Insertando…" : "Insertar en capítulo abierto"}</button>}<button type="button" className="secondary-button" disabled={insertingId === idea.id} onClick={() => void changeStatus(idea)}>{idea.status === "inbox" ? "Archivar" : "Devolver a bandeja"}</button></div></footer>
         </article>)}
       </div>
       <p className="ideas-note">Las ideas quedan privadas en este libro. Archivarlas las oculta de la bandeja, pero no las elimina.</p>
