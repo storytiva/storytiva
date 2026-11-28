@@ -1,0 +1,98 @@
+"use client";
+
+import { useCallback, useEffect, useState, type FormEvent } from "react";
+
+type Idea = { id: string; body: string; status: "inbox" | "archived"; created_at: string };
+
+export function IdeasInbox({ bookId, onClose }: { bookId: string; onClose: () => void }) {
+  const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [activeTab, setActiveTab] = useState<"inbox" | "archived">("inbox");
+  const [draft, setDraft] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const loadIdeas = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/books/${bookId}/ideas?status=${activeTab}`);
+      if (!response.ok) throw new Error("load");
+      const result = await response.json() as { ideas: Idea[] };
+      setIdeas(result.ideas);
+    } catch {
+      setError("No se pudieron cargar las ideas. Inténtalo de nuevo.");
+    } finally {
+      setLoading(false);
+    }
+  }, [bookId, activeTab]);
+
+  useEffect(() => { void loadIdeas(); }, [loadIdeas]);
+
+  const capture = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const body = draft.trim();
+    if (!body) return;
+    setSaving(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/books/${bookId}/ideas`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body }),
+      });
+      if (!response.ok) throw new Error("save");
+      setDraft("");
+      setActiveTab("inbox");
+      if (activeTab === "inbox") await loadIdeas();
+    } catch {
+      setError("No se pudo guardar. Conservamos el texto en el campo para que puedas reintentar.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const changeStatus = async (idea: Idea) => {
+    const status = idea.status === "inbox" ? "archived" : "inbox";
+    setError("");
+    try {
+      const response = await fetch(`/api/ideas/${idea.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!response.ok) throw new Error("update");
+      await loadIdeas();
+    } catch {
+      setError("No se pudo actualizar la idea.");
+    }
+  };
+
+  return <div className="ideas-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+    <section className="ideas-dialog" role="dialog" aria-modal="true" aria-labelledby="ideas-title">
+      <header className="ideas-header">
+        <div><p className="eyebrow">Captura rápida · Quick capture</p><h2 id="ideas-title">Ideas sueltas</h2></div>
+        <button type="button" className="secondary-button" onClick={onClose} aria-label="Cerrar bandeja de ideas">Cerrar</button>
+      </header>
+      <form className="idea-capture-form" onSubmit={capture}>
+        <label htmlFor="idea-body">Anota una idea y sigue escribiendo después</label>
+        <textarea id="idea-body" value={draft} onChange={(event) => setDraft(event.target.value)} maxLength={5000} rows={3} placeholder="Una escena, una pregunta, una frase… no necesita título ni capítulo."/>
+        <div className="capture-footer"><span>{draft.length}/5000</span><button type="submit" disabled={saving || !draft.trim()}>{saving ? "Guardando…" : "Guardar idea"}</button></div>
+      </form>
+      <div className="ideas-tabs" role="tablist" aria-label="Filtrar ideas">
+        <button type="button" role="tab" aria-selected={activeTab === "inbox"} className={activeTab === "inbox" ? "idea-tab active" : "idea-tab"} onClick={() => setActiveTab("inbox")}>Bandeja</button>
+        <button type="button" role="tab" aria-selected={activeTab === "archived"} className={activeTab === "archived" ? "idea-tab active" : "idea-tab"} onClick={() => setActiveTab("archived")}>Archivadas</button>
+      </div>
+      {error && <p className="ideas-error" role="alert">{error}</p>}
+      <div className="idea-list" role="tabpanel">
+        {loading && <p className="idea-empty">Cargando…</p>}
+        {!loading && ideas.length === 0 && <p className="idea-empty">{activeTab === "inbox" ? "Aún no hay ideas. Puedes capturar una arriba sin organizarla." : "No hay ideas archivadas."}</p>}
+        {!loading && ideas.map((idea) => <article className="idea-card" key={idea.id}>
+          <p>{idea.body}</p>
+          <footer><time dateTime={idea.created_at}>{new Date(idea.created_at).toLocaleString()}</time><button type="button" className="secondary-button" onClick={() => void changeStatus(idea)}>{idea.status === "inbox" ? "Archivar" : "Devolver a bandeja"}</button></footer>
+        </article>)}
+      </div>
+      <p className="ideas-note">Las ideas quedan privadas en este libro. Archivarlas las oculta de la bandeja, pero no las elimina.</p>
+    </section>
+  </div>;
+}
