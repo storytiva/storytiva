@@ -11,7 +11,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (typeof body.nodeId !== "string" || !Number.isInteger(body.cursorPosition) || (body.cursorPosition ?? -1) < 0) return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
   const { data: node } = await supabase.from("book_nodes").select("id").eq("id", body.nodeId).eq("book_id", bookId).maybeSingle();
   if (!node) return NextResponse.json({ error: "not_found" }, { status: 404 });
-  const { error } = await supabase.from("book_positions").upsert({ book_id: bookId, owner_id: user.id, node_id: body.nodeId, cursor_position: body.cursorPosition, updated_at: new Date().toISOString() });
+  const updatedAt = new Date().toISOString();
+  const { error: chapterPositionError } = await supabase.from("book_node_positions").upsert({ node_id: body.nodeId, book_id: bookId, owner_id: user.id, cursor_position: body.cursorPosition, updated_at: updatedAt });
+  if (chapterPositionError) return NextResponse.json({ error: "save_failed" }, { status: 400 });
+  const { error } = await supabase.from("book_positions").upsert({ book_id: bookId, owner_id: user.id, node_id: body.nodeId, cursor_position: body.cursorPosition, updated_at: updatedAt });
   if (error) return NextResponse.json({ error: "save_failed" }, { status: 400 });
   return NextResponse.json({ ok: true });
 }
