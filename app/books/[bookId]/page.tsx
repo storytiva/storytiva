@@ -49,6 +49,7 @@ export default async function BookPage({
     </header>
     {node
       ? <BookEditor
+          key={node.id}
           bookId={book.id}
           bookTitle={book.title}
           language={book.language}
