@@ -80,14 +80,6 @@ begin
   values (new_chapter_id, target_book_id, auth.uid(), 0, now())
   on conflict (node_id) do update set cursor_position = 0, updated_at = now();
 
-  insert into public.book_positions(book_id, owner_id, node_id, cursor_position, updated_at)
-  values (target_book_id, auth.uid(), new_chapter_id, 0, now())
-  on conflict (book_id) do update
-    set owner_id = excluded.owner_id,
-        node_id = excluded.node_id,
-        cursor_position = 0,
-        updated_at = now();
-
   update public.books set updated_at = now() where id = target_book_id;
   return new_chapter_id;
 end;
