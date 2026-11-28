@@ -117,3 +117,10 @@ button:hover { filter:brightness(1.08); }
   .ideas-header,.idea-card footer { align-items:stretch; flex-direction:column; }
   .editor-toolbar .ideas-button { margin-left:0; }
 }
+
+.idea-actions { display:flex; flex-wrap:wrap; justify-content:end; gap:8px; }
+.idea-actions button { padding:7px 10px; font-size:.82rem; }
+@media(max-width:620px) {
+  .idea-actions { justify-content:stretch; }
+  .idea-actions button { flex:1; }
+}
