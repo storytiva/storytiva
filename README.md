@@ -4,7 +4,7 @@
 
 Storytiva is an early-stage project for authors who want one dependable place to capture ideas, organize a manuscript gradually, return to their last writing session, and export their work. The product is designed for a bilingual Spanish-English market.
 
-> **Project status:** Core writing loop in progress: email sign-in, book creation, chapter editor, cloud autosave, local draft recovery, last-position persistence, version history, a quick-capture idea inbox, and inserting ideas into the open chapter.
+> **Project status:** Core writing loop in progress: email sign-in, book creation, chapter editor, cloud autosave, local draft recovery, last-position persistence, version history, a quick-capture idea inbox, inserting ideas into the open chapter, and chapter creation, renaming, reordering, and navigation.
 
 ## Product direction
 
