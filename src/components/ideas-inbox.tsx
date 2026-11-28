@@ -29,6 +29,11 @@ export function IdeasInbox({ bookId, onClose }: { bookId: string; onClose: () =>
 
   useEffect(() => { void loadIdeas(); }, [loadIdeas]);
 
+  const requestClose = () => {
+    if (draft.trim() && !window.confirm("La idea aún no está guardada. ¿Quieres cerrar y descartarla?")) return;
+    onClose();
+  };
+
   const capture = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const body = draft.trim();
@@ -68,11 +73,11 @@ export function IdeasInbox({ bookId, onClose }: { bookId: string; onClose: () =>
     }
   };
 
-  return <div className="ideas-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+  return <div className="ideas-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) requestClose(); }}>
     <section className="ideas-dialog" role="dialog" aria-modal="true" aria-labelledby="ideas-title">
       <header className="ideas-header">
         <div><p className="eyebrow">Captura rápida · Quick capture</p><h2 id="ideas-title">Ideas sueltas</h2></div>
-        <button type="button" className="secondary-button" onClick={onClose} aria-label="Cerrar bandeja de ideas">Cerrar</button>
+        <button type="button" className="secondary-button" onClick={requestClose} aria-label="Cerrar bandeja de ideas">Cerrar</button>
       </header>
       <form className="idea-capture-form" onSubmit={capture}>
         <label htmlFor="idea-body">Anota una idea y sigue escribiendo después</label>
